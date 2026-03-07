@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -10,38 +11,37 @@ import (
 )
 
 func loggingMiddleware(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        
-        ip := r.RemoteAddr                    
-        userAgent := r.Header.Get("User-Agent")
-        method   := r.Method            
-        path     := r.URL.Path         
-        query    := r.URL.RawQuery    
-        protocol := r.Proto          
-        host     := r.Host          
-        auth := r.Header.Get("Authorization") 
-        referrer := r.Referer()         
-        language := r.Header.Get("Accept-Language")
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-        log.Printf(`
-            IP:         %s
-            UserAgent:  %s
-            Method:     %s
-            Path:       %s
-            Query:      %s
-            Protocol:   %s
-            Host:       %s
-            Auth:       %s
-            Referrer:   %s
-            Language:   %s
-        `, ip, userAgent, method, path, query, protocol, host, auth, referrer, language)
+		ip := r.RemoteAddr
+		userAgent := r.Header.Get("User-Agent")
+		method := r.Method
+		path := r.URL.Path
+		query := r.URL.RawQuery
+		protocol := r.Proto
+		host := r.Host
+		auth := r.Header.Get("Authorization")
+		referrer := r.Referer()
+		language := r.Header.Get("Accept-Language")
 
-        next.ServeHTTP(w, r)
-    })
+		slog.Info("new request",
+			"ip", ip,
+			"user_agent", userAgent,
+			"method", method,
+			"path", path,
+			"query", query,
+			"protocol", protocol,
+			"host", host,
+			"auth", auth,
+			"referrer", referrer,
+			"language", language,
+		)
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func main() {
-
 	// initialize database connection
 	db := database.ConnectDatabase()
 	defer db.Close()
@@ -58,15 +58,21 @@ func main() {
 	mux.HandleFunc("GET /view/{id}", svc.View)
 
 	//logging
-	file, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	// file, err := os.OpenFile("app.json", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	file, err := os.OpenFile("app.json", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		panic(err.Error())
 	}
+	logger := slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{
+		AddSource: true,
+	}))
+	slog.SetDefault(logger)
 	log.SetOutput(file)
 
 	// start sercer
-	log.Println("Server listening on :8080")
-	if err := http.ListenAndServe(":8080", loggingMiddleware(mux) ); err != nil {
-		log.Println("HTTP server error:", err)
+	slog.Info("server listening on port 8080")
+	// slog.Info("Server listening on :8080")
+	if err := http.ListenAndServe(":8080", loggingMiddleware(mux)); err != nil {
+		slog.Error("error starting http server", "message", err.Error())
 	}
 }

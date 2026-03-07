@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -21,7 +21,6 @@ type BlogContent struct {
 	Content string `json:"content"`
 }
 
-
 type Service struct {
 	db *sql.DB
 }
@@ -31,9 +30,12 @@ func NewService(db *sql.DB) *Service {
 }
 
 func (s *Service) ViewAllBlogs(w http.ResponseWriter, r *http.Request) {
+
 	rows, err := s.db.Query("select * from blog where is_deleted = 0")
 	if err != nil {
-		log.Println("error: ", err.Error())
+		slog.Error("error occured", "error", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	defer rows.Close()
 
@@ -43,7 +45,7 @@ func (s *Service) ViewAllBlogs(w http.ResponseWriter, r *http.Request) {
 
 		err := rows.Scan(&_blog.ID, &_blog.CreatedAt, &_blog.ModifiedAt, &_blog.IsDeleted, &_blog.Content)
 		if err != nil {
-			log.Println("error: ", err.Error())
+			slog.Error("error occured", "error", err.Error())
 		}
 
 		allblogs = append(allblogs, _blog)
@@ -51,7 +53,9 @@ func (s *Service) ViewAllBlogs(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(allblogs); err != nil {
-		log.Println("error:", err.Error())
+		slog.Error("error occured", "error", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -59,7 +63,10 @@ func (s *Service) AddNewBlog(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Println("error: ", err.Error())
+		slog.Error("error occured", "error", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+
 	}
 
 	var blogContent BlogContent
@@ -69,17 +76,23 @@ func (s *Service) AddNewBlog(w http.ResponseWriter, r *http.Request) {
 
 	res, err := s.db.Exec("insert into blog (content) values (?)", blogContent.Content)
 	if err != nil {
-		log.Println("error: ", err.Error())
+		slog.Error("error occured", "error", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		log.Println("error: ", err.Error())
+		slog.Error("error occured", "error", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	row, err := s.db.Query("select * from blog where id = ? and is_deleted = 0", id)
 	if err != nil {
-		log.Println("error: ", err.Error())
+		slog.Error("error occured", "error", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	var blog Blog
@@ -93,13 +106,15 @@ func (s *Service) AddNewBlog(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) UpdateBlog(w http.ResponseWriter, r *http.Request) {
-
 	id := r.PathValue("id")
 
 	// check if such record exists
 	rows, err := s.db.Query("select * from blog where id = ? and is_deleted = 0", id)
 	if err != nil {
-		log.Println("error: ", err.Error())
+		slog.Error("error occured", "error", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+
 	}
 
 	var blog Blog
@@ -111,7 +126,7 @@ func (s *Service) UpdateBlog(w http.ResponseWriter, r *http.Request) {
 	var blogcontent BlogContent
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Println("error: ", err.Error())
+		slog.Error("error occured", "error", err.Error())
 	}
 
 	json.Unmarshal(body, &blogcontent)
@@ -120,14 +135,18 @@ func (s *Service) UpdateBlog(w http.ResponseWriter, r *http.Request) {
 
 	updated_rows, err := s.db.Query("select * from blog where id = ? and is_deleted = 0", id)
 	if err != nil {
-		log.Println("error: ", err.Error())
+		slog.Error("error occured", "error", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	for updated_rows.Next() {
 		updated_rows.Scan(&blog.ID, &blog.CreatedAt, &blog.ModifiedAt, &blog.IsDeleted, &blog.Content)
 	}
 
 	if err := json.NewEncoder(w).Encode(blog); err != nil {
-		log.Println("error: ", err.Error())
+		slog.Error("error occured", "error", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -136,19 +155,25 @@ func (s *Service) DeleteBlog(w http.ResponseWriter, r *http.Request) {
 
 	_, err := s.db.Exec("update blog set is_deleted = 1 where id = ?", id)
 	if err != nil {
-		log.Println("error: ", err.Error())
+		slog.Error("error occured", "error", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	row, err := s.db.Query("select * from blog where id  = ? and is_deleted = 0", id)
 	if err != nil {
-		log.Println("error: ", err.Error())
+		slog.Error("error occured", "error", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	var blog Blog
 	for row.Next() {
 		err := row.Scan(&blog.ID, &blog.CreatedAt, &blog.ModifiedAt, &blog.IsDeleted, &blog.Content)
 		if err != nil {
-			log.Println("error: ", err.Error())
+			slog.Error("error occured", "error", err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 	}
 
@@ -161,7 +186,9 @@ func (s *Service) View(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := s.db.Query("select * from blog where id = ? and is_deleted = 0", id)
 	if err != nil {
-		log.Println("error: ", err.Error())
+		slog.Error("error occured", "error", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	defer rows.Close()
 
@@ -169,12 +196,16 @@ func (s *Service) View(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		err := rows.Scan(&_blog.ID, &_blog.CreatedAt, &_blog.ModifiedAt, &_blog.IsDeleted, &_blog.Content)
 		if err != nil {
-			log.Println("error: ", err.Error())
+			slog.Error("error occured", "error", err.Error())
+			http.Error(w, "failed to create blog", http.StatusInternalServerError)
+			return
 		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(_blog); err != nil {
-		log.Println("error:", err.Error())
+		slog.Error("error occured", "error", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
