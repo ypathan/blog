@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"yousuf.xyz/blog/controller"
 	"yousuf.xyz/blog/database"
 	"yousuf.xyz/blog/service"
 )
@@ -47,18 +48,20 @@ func main() {
 	defer db.Close()
 
 	// create service with database connection
-	svc := service.NewService(db)
+	blogService := service.NewBlogService(db)
+
+	// create controller with service
+	blogController := controller.NewBlogController(blogService)
 
 	//routes
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /add", svc.AddNewBlog)
-	mux.HandleFunc("DELETE /delete/{id}", svc.DeleteBlog)
-	mux.HandleFunc("PUT /update/{id}", svc.UpdateBlog)
-	mux.HandleFunc("GET /viewall", svc.ViewAllBlogs)
-	mux.HandleFunc("GET /view/{id}", svc.View)
+	mux.HandleFunc("POST /add", blogController.AddNewBlog)
+	mux.HandleFunc("DELETE /delete/{id}", blogController.DeleteBlog)
+	mux.HandleFunc("PUT /update/{id}", blogController.UpdateBlog)
+	mux.HandleFunc("GET /viewall", blogController.ViewAllBlogs)
+	mux.HandleFunc("GET /view/{id}", blogController.ViewBlog)
 
 	//logging
-	// file, err := os.OpenFile("app.json", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	file, err := os.OpenFile("app.json", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		panic(err.Error())
@@ -70,8 +73,7 @@ func main() {
 	log.SetOutput(file)
 
 	// start sercer
-	slog.Info("server listening on port 8080")
-	// slog.Info("Server listening on :8080")
+	slog.Info("server started", "port", "8080")
 	if err := http.ListenAndServe(":8080", loggingMiddleware(mux)); err != nil {
 		slog.Error("error starting http server", "message", err.Error())
 	}
