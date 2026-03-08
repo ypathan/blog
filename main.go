@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -45,16 +44,15 @@ func loggingMiddleware(next http.Handler) http.Handler {
 func main() {
 	//logging
 	// file, err := os.OpenFile("app.json", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	file, err := os.OpenFile("app.json", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	if err != nil {
-		panic(err.Error())
-	}
-	logger := slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{
+
+	// file, err := os.OpenFile("app.json", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	// if err != nil {
+	// 	panic(err.Error())
+	// }
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		AddSource: true,
 	}))
 	slog.SetDefault(logger)
-	log.SetOutput(file)
-
 
 	// initialize database connection
 	db := database.ConnectDatabase()

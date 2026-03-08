@@ -38,7 +38,6 @@ func ConnectDatabase() *sql.DB {
 		slog.Error("error reading initdb file content", "error", err.Error())
 	}
 
-	fmt.Println("sql data" , string(data))
 	if _, err := db.Exec(string(data)); err != nil {
 		slog.Error("error executing init sql", "error", err.Error())
 	}
