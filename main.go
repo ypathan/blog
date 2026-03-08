@@ -43,6 +43,19 @@ func loggingMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
+	//logging
+	// file, err := os.OpenFile("app.json", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	file, err := os.OpenFile("app.json", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		panic(err.Error())
+	}
+	logger := slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{
+		AddSource: true,
+	}))
+	slog.SetDefault(logger)
+	log.SetOutput(file)
+
+
 	// initialize database connection
 	db := database.ConnectDatabase()
 	defer db.Close()
@@ -60,17 +73,6 @@ func main() {
 	mux.HandleFunc("PUT /update/{id}", blogController.UpdateBlog)
 	mux.HandleFunc("GET /viewall", blogController.ViewAllBlogs)
 	mux.HandleFunc("GET /view/{id}", blogController.ViewBlog)
-
-	//logging
-	file, err := os.OpenFile("app.json", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	if err != nil {
-		panic(err.Error())
-	}
-	logger := slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{
-		AddSource: true,
-	}))
-	slog.SetDefault(logger)
-	log.SetOutput(file)
 
 	// start sercer
 	slog.Info("server started", "port", "8080")
