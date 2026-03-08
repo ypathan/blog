@@ -20,6 +20,7 @@ func ConnectDatabase() *sql.DB {
 	DBUSER := os.Getenv("DBUSER")
 	DBPASSWORD := os.Getenv("DBPASSWORD")
 	DBSSLMODE := os.Getenv("DBSSLMODE")
+	ENV := os.Getenv("ENV")
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",DBHOST, DBPORT, DBUSER, DBPASSWORD, DBNAME, DBSSLMODE)
 
@@ -33,7 +34,15 @@ func ConnectDatabase() *sql.DB {
 		slog.Error("error pinging the database", "error", err.Error())
 	}
 
-	data,err  := os.ReadFile("database/init.sql")
+
+	var sqlfile string
+	if ENV == "PROD" {
+		sqlfile = "init.sql"	
+	}else if ENV == "DEV"{
+		sqlfile = "database/init.sql"
+	}
+
+	data,err  := os.ReadFile(sqlfile)
 	if err != nil {
 		slog.Error("error reading initdb file content", "error", err.Error())
 	}
