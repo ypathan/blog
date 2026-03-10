@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"text/template"
 
 	"yousuf.xyz/blog/model"
 	"yousuf.xyz/blog/service"
@@ -17,6 +18,25 @@ type BlogController struct {
 
 func NewBlogController(service *service.BlogService) *BlogController {
 	return &BlogController{service: service}
+}
+
+func (s *BlogController) ServeIndex(w http.ResponseWriter, r *http.Request) {
+	slog.Debug("received request")
+
+	temp := template.Must(template.ParseFiles("static/index.html"))
+
+	allBlogs,err  := s.service.GetAllBlogs()
+	if err != nil {
+		slog.Error("error getting all blogs", "error", err.Error())
+	}
+
+	
+	ctx := map[string]any{
+		"username" : "ypathan",
+		"allBlogs" : allBlogs,
+	}
+
+	temp.Execute(w, ctx)
 }
 
 func (c *BlogController) AddNewBlog(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +54,7 @@ func (c *BlogController) AddNewBlog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blog, err := c.service.CreateBlog(blogReq.Content)
+	blog, err := c.service.CreateBlog(blogReq)
 	if err != nil {
 		slog.Error("failed to create blog", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

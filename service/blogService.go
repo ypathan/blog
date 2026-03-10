@@ -17,9 +17,10 @@ func NewBlogService(db *sql.DB) *BlogService {
 	}
 }
 
-func (s *BlogService) CreateBlog(content string) (*model.Blog, error) {
+func (s *BlogService) CreateBlog(blogReq model.BlogRequest) (*model.Blog, error) {
 	blog := &model.Blog{
-		Content: content,
+		Content: blogReq.Content,
+		Title: blogReq.Title,
 	}
 	return s.repo.Create(blog)
 }

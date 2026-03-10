@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"log/slog"
+	"time"
 
 	"yousuf.xyz/blog/model"
 )
@@ -17,7 +18,7 @@ func NewBlogRepository(db *sql.DB) *BlogRepository {
 
 func (r *BlogRepository) Create(blog *model.Blog) (*model.Blog, error) {
 	var id int
-	err := r.db.QueryRow("INSERT INTO blog (content) VALUES ($1) RETURNING id", blog.Content).Scan(&id)
+	err := r.db.QueryRow("INSERT INTO blog (content, title) VALUES ($1, $2) RETURNING id", blog.Content, blog.Title).Scan(&id)
 	if err != nil {
 		slog.Error("failed to insert blog", "error", err)
 		return nil, err
@@ -55,7 +56,6 @@ func (r *BlogRepository) FindAll() ([]model.Blog, error) {
 		return nil, err
 	}
 	defer rows.Close()
-
 	var blogs []model.Blog
 	for rows.Next() {
 		var blog model.Blog
@@ -64,9 +64,10 @@ func (r *BlogRepository) FindAll() ([]model.Blog, error) {
 			slog.Error("failed to scan blog row", "error", err)
 			continue
 		}
+		t, _ := time.Parse(time.RFC3339Nano, blog.CreatedAt)
+		blog.CreatedAt = t.Format("2006-01-02")
 		blogs = append(blogs, blog)
 	}
-
 	return blogs, nil
 }
 

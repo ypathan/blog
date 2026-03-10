@@ -64,8 +64,16 @@ func main() {
 	// create controller with service
 	blogController := controller.NewBlogController(blogService)
 
+
 	//routes
 	mux := http.NewServeMux()
+
+	
+	//static file config
+	fs := http.FileServer(http.Dir("./static"))
+	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+
+	mux.HandleFunc("/", blogController.ServeIndex)
 	mux.HandleFunc("POST /add", blogController.AddNewBlog)
 	mux.HandleFunc("DELETE /delete/{id}", blogController.DeleteBlog)
 	mux.HandleFunc("PUT /update/{id}", blogController.UpdateBlog)
