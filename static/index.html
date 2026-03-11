@@ -40,18 +40,20 @@
 
 
 
-	<div class="container">
-		<h1>brain dump</h1>
+		<div class="container">
+			<h1>brain dumps</h1>
 
-		{{range .allBlogs}}
-		<div class="blogcontainer">
+			{{range .allBlogs}}
+			<div class="blogparent">
+				<div class="blogcontainer">
+					<span id="title">{{.Title}}</span><br>
+					<span id="date">{{.CreatedAt}}</span><br>
+					<span id="content">{{.Content}}</span>
+				</div>
+			</div>
+			{{end}}
 
-			<span id="date">{{.CreatedAt}}</span><br>
-			<span id="content">{{.Content}}</span>
 		</div>
-		{{end}}
-
-	</div>
 
 
 

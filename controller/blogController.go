@@ -138,7 +138,7 @@ func (c *BlogController) UpdateBlog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blog, err := c.service.UpdateBlog(id, blogReq.Content)
+	blog, err := c.service.UpdateBlog(id, blogReq.Content, blogReq.Title)
 	if err != nil {
 		slog.Error("failed to update blog", "id", id, "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

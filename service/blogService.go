@@ -33,8 +33,8 @@ func (s *BlogService) GetBlogByID(id int) (*model.Blog, error) {
 	return s.repo.FindByID(id)
 }
 
-func (s *BlogService) UpdateBlog(id int, content string) (*model.Blog, error) {
-	return s.repo.Update(id, content)
+func (s *BlogService) UpdateBlog(id int, content string, title string) (*model.Blog, error) {
+	return s.repo.Update(id, content, title)
 }
 
 func (s *BlogService) DeleteBlog(id int) error {
