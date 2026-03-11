@@ -8,5 +8,6 @@ FROM debian:bookworm-slim
 WORKDIR /app
 COPY --from=builder /app/blog /app
 COPY --from=builder /app/database/init.sql /app
+COPY --from=builder /app/static /app/static
 EXPOSE 8080 
 ENTRYPOINT [ "./blog" ]
