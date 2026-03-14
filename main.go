@@ -42,13 +42,16 @@ func loggingMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
-	//logging
+
+	//--------------logging to file---------------------
 	// file, err := os.OpenFile("app.json", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 
 	// file, err := os.OpenFile("app.json", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	// if err != nil {
 	// 	panic(err.Error())
 	// }
+
+	// -------------log to std out---------------------
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		AddSource: true,
 	}))
@@ -74,6 +77,8 @@ func main() {
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	mux.HandleFunc("/", blogController.ServeIndex)
+	mux.HandleFunc("/blog/{id}", blogController.ServeBlog)
+
 	mux.HandleFunc("POST /add", blogController.AddNewBlog)
 	mux.HandleFunc("DELETE /delete/{id}", blogController.DeleteBlog)
 	mux.HandleFunc("PUT /update/{id}", blogController.UpdateBlog)

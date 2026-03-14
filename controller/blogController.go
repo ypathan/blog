@@ -21,19 +21,41 @@ func NewBlogController(service *service.BlogService) *BlogController {
 }
 
 func (s *BlogController) ServeIndex(w http.ResponseWriter, r *http.Request) {
-	slog.Debug("received request")
+	temp := template.Must(template.ParseFiles("static/index.html", "static/ascii.html", "static/particles.html"))
 
-	temp := template.Must(template.ParseFiles("static/index.html"))
-
-	allBlogs,err  := s.service.GetAllBlogs()
+	allBlogs, err := s.service.GetAllBlogs()
 	if err != nil {
 		slog.Error("error getting all blogs", "error", err.Error())
 	}
 
-	
 	ctx := map[string]any{
-		"username" : "ypathan",
-		"allBlogs" : allBlogs,
+		"username": "ypathan",
+		"allBlogs": allBlogs,
+	}
+
+	temp.Execute(w, ctx)
+}
+
+func (s *BlogController) ServeBlog(w http.ResponseWriter, r *http.Request) {
+	temp := template.Must(template.ParseFiles("static/blog.html", "static/ascii.html", "static/particles.html"))
+
+	idstr := r.PathValue("id")
+	id, err := strconv.Atoi(idstr)
+
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	blog, err := s.service.GetBlogByID(id)
+
+	if err != nil {
+		slog.Error("error getting all blogs", "error", err.Error())
+	}
+
+	ctx := map[string]any{
+		"username": "ypathan",
+		"blog":     blog,
 	}
 
 	temp.Execute(w, ctx)

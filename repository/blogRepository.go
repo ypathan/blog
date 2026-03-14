@@ -46,6 +46,9 @@ func (r *BlogRepository) FindByID(id int) (*model.Blog, error) {
 		return nil, err
 	}
 
+	t, _ := time.Parse(time.RFC3339Nano, blog.CreatedAt)
+	blog.CreatedAt = t.Format("2006-01-02")
+
 	return &blog, nil
 }
 
@@ -81,7 +84,7 @@ func (r *BlogRepository) FindAll() ([]model.Blog, error) {
 
 func (r *BlogRepository) Update(id int, content string, title string) (*model.Blog, error) {
 
-	_, err := r.db.Exec("UPDATE blog SET content = $1, title = $2  WHERE id = $3", content, title,  id)
+	_, err := r.db.Exec("UPDATE blog SET content = $1, title = $2  WHERE id = $3", content, title, id)
 	if err != nil {
 		slog.Error("failed to update blog", "error", err)
 		return nil, err

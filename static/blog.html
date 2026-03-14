@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{.blog.Title}}</title>
+	<link href="/static/css/global.css" rel="stylesheet">
+	<link href="/static/css/blog.css" rel="stylesheet">
+</head>
+
+<body>
+
+	{{template "ascii" .}}
+
+	<div class="container">
+		<div class="child">
+			<h1 id="title">{{.blog.Title}}</h1><br>
+			<span id="date">Written On: {{.blog.CreatedAt}}</span><br>
+			<span id="content">{{.blog.Content}}</span>
+		</div>
+	</div>
+
+</body>
+
+{{ template "particles" . }}
+<script src="/static/scripts/blog.js"> </script>
+
+</html>
