@@ -1,26 +1,17 @@
-.blogparent {
-	position: relative;
-}
-
-.blogparent::before {
-	content: '';
-	position: absolute;
-	inset: 0;
+.blogparent{
 	background-color: rgba(255, 255, 255, 0.05);
 	backdrop-filter: blur(8px);
 	-webkit-backdrop-filter: blur(8px);
 	border-radius: 30px;
-	z-index: 0;
 }
 
 .blogcontainer {
-	position: relative;
-	z-index: 1;
 	border-left: 1px dashed white;
 	border-right: 1px dashed white;
 	border-radius: 30px;
 	padding: 10px 20px;
 	margin-bottom: 15px;
+	cursor: pointer;
 }
 
 #date,

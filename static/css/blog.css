@@ -1,9 +1,8 @@
-.child::before{
+.parent{ 
+	max-width: 60%;
+	background-color: rgba(255, 255, 255, 0.05);
+	backdrop-filter: blur(10px);
 	padding: 2%;
-	background-color: rgba(255, 255, 255 , 0.1);
-	backdrop-filter: blur(100px);
-	border-radius: 8px;
-	isolation: isolate;
 }
 
 
@@ -11,3 +10,8 @@
 	color: lightgray;
 }
 
+@media screen and (max-width : 600px){
+	.parent {
+		max-width: 90%;
+	}
+}
