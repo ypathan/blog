@@ -1,5 +1,6 @@
 .parent{ 
 	max-width: 60%;
+	min-width: 60%;
 	background-color: rgba(255, 255, 255, 0.05);
 	backdrop-filter: blur(10px);
 	padding: 2%;
@@ -10,8 +11,13 @@
 	color: lightgray;
 }
 
+#date,#content {
+	font-size: 1.5rem;
+}
+
 @media screen and (max-width : 600px){
 	.parent {
 		max-width: 90%;
+		min-width: 90%;
 	}
 }

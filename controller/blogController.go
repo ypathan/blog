@@ -21,9 +21,10 @@ func NewBlogController(service *service.BlogService) *BlogController {
 }
 
 func (s *BlogController) ServeIndex(w http.ResponseWriter, r *http.Request) {
-	temp := template.Must(template.ParseFiles("static/index.html", "static/ascii.html", "static/particles.html"))
 
 	allBlogs, err := s.service.GetAllBlogs()
+
+	temp := template.Must(template.ParseFiles("static/index.gohtml", "static/ascii.html", "static/particles.html"))
 	if err != nil {
 		slog.Error("error getting all blogs", "error", err.Error())
 	}
@@ -37,7 +38,7 @@ func (s *BlogController) ServeIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *BlogController) ServeBlog(w http.ResponseWriter, r *http.Request) {
-	temp := template.Must(template.ParseFiles("static/blog.html", "static/ascii.html", "static/particles.html"))
+	temp := template.Must(template.ParseFiles("static/blog.gohtml", "static/ascii.html", "static/particles.html"))
 
 	idstr := r.PathValue("id")
 	id, err := strconv.Atoi(idstr)

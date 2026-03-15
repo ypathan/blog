@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ypathan's blog</title>
+    <link href="static/css/index.css" rel="stylesheet">
+    <link href="static/css/global.css" rel="stylesheet">
+</head>
+
+<body>
+
+{{template "ascii" .}}
+
+{{range $pageNum, $blogs := .allBlogs}}
+    <div class="page" id="page-{{$pageNum}}">
+        <h1>Page: {{$pageNum}}</h1>
+        {{range $blogs}}
+            <div class="blogparent">
+                <div class="blogcontainer" data-id={{.ID}} onclick="handleViewBlog(this)">
+                    <h2>{{.Title}}</h2>
+                    <span id="date">Written On: {{.CreatedAt}}</span>
+                    <p>{{.Content}}</p>
+                </div>
+            </div>
+        {{end}}
+
+        <div class="pagination">
+            <button onclick="changePage(-1)">← Prev</button>
+            <span id="pageIndicator"></span>
+            <button onclick="changePage(1)">Next →</button>
+        </div>
+    </div>
+{{end}}
+
+
+<script src="static/scripts/index.js"></script>
+{{template "particles" . }}
+</body>
+
+</html>

@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"log/slog"
+	"math"
 	"time"
 
 	"yousuf.xyz/blog/model"
@@ -52,7 +53,7 @@ func (r *BlogRepository) FindByID(id int) (*model.Blog, error) {
 	return &blog, nil
 }
 
-func (r *BlogRepository) FindAll() ([]model.Blog, error) {
+func (r *BlogRepository) FindAll() (map[int][]model.Blog, error) {
 	rows, err := r.db.Query("SELECT id, created_at, modified_at, is_deleted, content, title FROM blog WHERE is_deleted = false")
 	if err != nil {
 		slog.Error("failed to query blogs", "error", err)
@@ -60,6 +61,7 @@ func (r *BlogRepository) FindAll() ([]model.Blog, error) {
 	}
 	defer rows.Close()
 	var blogs []model.Blog
+
 	for rows.Next() {
 		var blog model.Blog
 		err := rows.Scan(&blog.ID, &blog.CreatedAt, &blog.ModifiedAt, &blog.IsDeleted, &blog.Content, &blog.Title)
@@ -79,7 +81,33 @@ func (r *BlogRepository) FindAll() ([]model.Blog, error) {
 
 		blogs = append(blogs, blog)
 	}
-	return blogs, nil
+
+	pagination:=  make(map[int][]model.Blog)
+
+	if (len(blogs) > 10 ){
+
+		start := 0
+		var end int
+
+		totalpages := math.Round(float64(len(blogs))/10)
+		lastpageblock := len(blogs) % 10
+
+		for i:=1; i <= int(totalpages); i++ {
+			if i == int(totalpages ) {	
+				end = start + lastpageblock
+				pagination[i] = blogs[start:end]
+			}else{
+				end = start + 10
+				pagination[i] = blogs[start:end]
+			}
+			start = end	
+		}
+	}else{
+		pagination[1] = blogs
+	}
+
+	print(pagination)
+	return pagination, nil
 }
 
 func (r *BlogRepository) Update(id int, content string, title string) (*model.Blog, error) {

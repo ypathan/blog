@@ -25,7 +25,7 @@ func (s *BlogService) CreateBlog(blogReq model.BlogRequest) (*model.Blog, error)
 	return s.repo.Create(blog)
 }
 
-func (s *BlogService) GetAllBlogs() ([]model.Blog, error) {
+func (s *BlogService) GetAllBlogs() (map[int][]model.Blog, error) {
 	return s.repo.FindAll()
 }
 

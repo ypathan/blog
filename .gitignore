@@ -2,3 +2,5 @@ app.json
 blog.db
 .env
 tmp/
+.idea/
+.vscode/

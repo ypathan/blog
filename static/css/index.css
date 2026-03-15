@@ -3,20 +3,42 @@
 	backdrop-filter: blur(8px);
 	-webkit-backdrop-filter: blur(8px);
 	border-radius: 30px;
+	border-left: 1px dashed white;
+	border-right: 1px dashed white;
+	max-width: 60%;
+	min-width: 60%;
+	margin: 15px;
 }
 
 .blogcontainer {
-	border-left: 1px dashed white;
-	border-right: 1px dashed white;
 	border-radius: 30px;
 	padding: 10px 20px;
-	margin-bottom: 15px;
 	cursor: pointer;
+	width: 100%;
 }
 
 #date,
 #content {
-	font-size: 10px;
+	font-size: 1.5rem;
 	color: lightgray;
 }
 
+button {
+	font-size: 1.5rem;
+	margin: 10%;
+	cursor: pointer;
+	/*width: 20px;*/
+}
+
+.pagination {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+}
+
+.page{
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+}
