@@ -7,7 +7,6 @@ import (
 
 	"yousuf.xyz/blog/controller"
 	"yousuf.xyz/blog/database"
-	"yousuf.xyz/blog/service"
 )
 
 func loggingMiddleware(next http.Handler) http.Handler {
@@ -61,31 +60,31 @@ func main() {
 	db := database.ConnectDatabase()
 	defer db.Close()
 
-	// create service with database connection
-	blogService := service.NewBlogService(db)
-
-	// create controller with service
-	blogController := controller.NewBlogController(blogService)
-
+	// passing db conn to controllers
+	blogController := controller.NewBlogController(db)
+	authController := controller.NewAuthController(db)
 
 	//routes
 	mux := http.NewServeMux()
 
-	
 	//static file config
 	fs := http.FileServer(http.Dir("./static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
-
 	mux.HandleFunc("/", blogController.ServeIndex)
 	mux.HandleFunc("/blog/{id}", blogController.ServeBlog)
 
+	// auth
+	mux.HandleFunc("POST /register", authController.RegisterUser)
+	mux.HandleFunc("POST /login", authController.LoginUser)
+
+	// application related
 	mux.HandleFunc("POST /add", blogController.AddNewBlog)
 	mux.HandleFunc("DELETE /delete/{id}", blogController.DeleteBlog)
 	mux.HandleFunc("PUT /update/{id}", blogController.UpdateBlog)
 	mux.HandleFunc("GET /viewall", blogController.ViewAllBlogs)
 	mux.HandleFunc("GET /view/{id}", blogController.ViewBlog)
 
-	// start sercer
+	// start server
 	slog.Info("server started", "port", "8080")
 	if err := http.ListenAndServe(":8080", loggingMiddleware(mux)); err != nil {
 		slog.Error("error starting http server", "message", err.Error())

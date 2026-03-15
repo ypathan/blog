@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"database/sql"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -8,21 +9,23 @@ import (
 	"strconv"
 	"text/template"
 
-	"yousuf.xyz/blog/model"
-	"yousuf.xyz/blog/service"
+	"yousuf.xyz/blog/repository"
+	"yousuf.xyz/blog/types"
 )
 
 type BlogController struct {
-	service *service.BlogService
+	repo *repository.BlogRepository
 }
 
-func NewBlogController(service *service.BlogService) *BlogController {
-	return &BlogController{service: service}
+func NewBlogController(dbconn *sql.DB) *BlogController {
+	return &BlogController{
+		repo: repository.NewBlogRepository(dbconn),
+	}
 }
 
 func (s *BlogController) ServeIndex(w http.ResponseWriter, r *http.Request) {
 
-	allBlogs, err := s.service.GetAllBlogs()
+	allBlogs, err := s.repo.FindAll()
 
 	temp := template.Must(template.ParseFiles("static/index.gohtml", "static/ascii.html", "static/particles.html"))
 	if err != nil {
@@ -48,7 +51,7 @@ func (s *BlogController) ServeBlog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blog, err := s.service.GetBlogByID(id)
+	blog, err := s.repo.FindByID(id)
 
 	if err != nil {
 		slog.Error("error getting all blogs", "error", err.Error())
@@ -70,14 +73,18 @@ func (c *BlogController) AddNewBlog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var blogReq model.BlogRequest
+	var blogReq types.BlogRequest
 	if err := json.Unmarshal(body, &blogReq); err != nil {
 		slog.Error("failed to unmarshal request body", "error", err)
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	blog, err := c.service.CreateBlog(blogReq)
+	blog, err := c.repo.Create(&types.Blog{
+		Content: blogReq.Content,
+		Title:   blogReq.Title,
+	})
+
 	if err != nil {
 		slog.Error("failed to create blog", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -94,7 +101,7 @@ func (c *BlogController) AddNewBlog(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *BlogController) ViewAllBlogs(w http.ResponseWriter, r *http.Request) {
-	blogs, err := c.service.GetAllBlogs()
+	blogs, err := c.repo.FindAll()
 	if err != nil {
 		slog.Error("failed to get all blogs", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -118,7 +125,7 @@ func (c *BlogController) ViewBlog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blog, err := c.service.GetBlogByID(id)
+	blog, err := c.repo.FindByID(id)
 	if err != nil {
 		slog.Error("failed to get blog", "id", id, "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -154,14 +161,14 @@ func (c *BlogController) UpdateBlog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var blogReq model.BlogRequest
+	var blogReq types.BlogRequest
 	if err := json.Unmarshal(body, &blogReq); err != nil {
 		slog.Error("failed to unmarshal request body", "error", err)
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	blog, err := c.service.UpdateBlog(id, blogReq.Content, blogReq.Title)
+	blog, err := c.repo.Update(id, blogReq.Content, blogReq.Title)
 	if err != nil {
 		slog.Error("failed to update blog", "id", id, "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -185,7 +192,7 @@ func (c *BlogController) DeleteBlog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := c.service.DeleteBlog(id); err != nil {
+	if err := c.repo.Delete(id); err != nil {
 		slog.Error("failed to delete blog", "id", id, "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

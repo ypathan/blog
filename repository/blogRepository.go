@@ -6,7 +6,7 @@ import (
 	"math"
 	"time"
 
-	"yousuf.xyz/blog/model"
+	"yousuf.xyz/blog/types"
 )
 
 type BlogRepository struct {
@@ -17,7 +17,7 @@ func NewBlogRepository(db *sql.DB) *BlogRepository {
 	return &BlogRepository{db: db}
 }
 
-func (r *BlogRepository) Create(blog *model.Blog) (*model.Blog, error) {
+func (r *BlogRepository) Create(blog *types.Blog) (*types.Blog, error) {
 	var id int
 	err := r.db.QueryRow("INSERT INTO blog (content, title) VALUES ($1, $2) RETURNING id", blog.Content, blog.Title).Scan(&id)
 	if err != nil {
@@ -34,10 +34,10 @@ func (r *BlogRepository) Create(blog *model.Blog) (*model.Blog, error) {
 	return createdBlog, nil
 }
 
-func (r *BlogRepository) FindByID(id int) (*model.Blog, error) {
+func (r *BlogRepository) FindByID(id int) (*types.Blog, error) {
 	row := r.db.QueryRow("SELECT id, created_at, modified_at, is_deleted, content, title FROM blog WHERE id = $1 AND is_deleted = false", id)
 
-	var blog model.Blog
+	var blog types.Blog
 	err := row.Scan(&blog.ID, &blog.CreatedAt, &blog.ModifiedAt, &blog.IsDeleted, &blog.Content, &blog.Title)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -53,17 +53,17 @@ func (r *BlogRepository) FindByID(id int) (*model.Blog, error) {
 	return &blog, nil
 }
 
-func (r *BlogRepository) FindAll() (map[int][]model.Blog, error) {
+func (r *BlogRepository) FindAll() (map[int][]types.Blog, error) {
 	rows, err := r.db.Query("SELECT id, created_at, modified_at, is_deleted, content, title FROM blog WHERE is_deleted = false")
 	if err != nil {
 		slog.Error("failed to query blogs", "error", err)
 		return nil, err
 	}
 	defer rows.Close()
-	var blogs []model.Blog
+	var blogs []types.Blog
 
 	for rows.Next() {
-		var blog model.Blog
+		var blog types.Blog
 		err := rows.Scan(&blog.ID, &blog.CreatedAt, &blog.ModifiedAt, &blog.IsDeleted, &blog.Content, &blog.Title)
 		if err != nil {
 			slog.Error("failed to scan blog row", "error", err)
@@ -82,27 +82,27 @@ func (r *BlogRepository) FindAll() (map[int][]model.Blog, error) {
 		blogs = append(blogs, blog)
 	}
 
-	pagination:=  make(map[int][]model.Blog)
+	pagination := make(map[int][]types.Blog)
 
-	if (len(blogs) > 10 ){
+	if len(blogs) > 10 {
 
 		start := 0
 		var end int
 
-		totalpages := math.Round(float64(len(blogs))/10)
+		totalpages := math.Round(float64(len(blogs)) / 10)
 		lastpageblock := len(blogs) % 10
 
-		for i:=1; i <= int(totalpages); i++ {
-			if i == int(totalpages ) {	
+		for i := 1; i <= int(totalpages); i++ {
+			if i == int(totalpages) {
 				end = start + lastpageblock
 				pagination[i] = blogs[start:end]
-			}else{
+			} else {
 				end = start + 10
 				pagination[i] = blogs[start:end]
 			}
-			start = end	
+			start = end
 		}
-	}else{
+	} else {
 		pagination[1] = blogs
 	}
 
@@ -110,7 +110,7 @@ func (r *BlogRepository) FindAll() (map[int][]model.Blog, error) {
 	return pagination, nil
 }
 
-func (r *BlogRepository) Update(id int, content string, title string) (*model.Blog, error) {
+func (r *BlogRepository) Update(id int, content string, title string) (*types.Blog, error) {
 
 	_, err := r.db.Exec("UPDATE blog SET content = $1, title = $2  WHERE id = $3", content, title, id)
 	if err != nil {
