@@ -5,9 +5,53 @@ import (
 	"net/http"
 	"os"
 
-	"yousuf.xyz/blog/controller"
 	"yousuf.xyz/blog/database"
+	"yousuf.xyz/blog/handlers"
 )
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "http://127.0.0.1:59188")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func protected(next http.Handler) http.Handler {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		sessionToken, err := r.Cookie("session_token")
+		if err != nil {
+			slog.Error("error getting session_token from request", "error", err.Error())
+			http.Error(w, "Unauthorize Access, Login First", 401 )
+			return
+		}
+
+		csrfToken, err := r.Cookie("csrf_token")
+		if err != nil {
+			slog.Error("error getting csrf_token from request", "error", err.Error())
+			http.Error(w, "Unauthorize Access, Login First", 401 )
+			return
+		}
+
+		if sessionToken.Value == "" || csrfToken.Value == "" {
+			slog.Error("either of the required cookie is empty" ) 
+			http.Error(w, "Unauthorize Access, Login First", 401 )
+			return
+		}
+
+
+		next.ServeHTTP(w, r)
+	})
+}
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -53,6 +97,7 @@ func main() {
 	// -------------log to std out---------------------
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		AddSource: true,
+		Level: slog.LevelDebug,
 	}))
 	slog.SetDefault(logger)
 
@@ -60,9 +105,10 @@ func main() {
 	db := database.ConnectDatabase()
 	defer db.Close()
 
-	// passing db conn to controllers
-	blogController := controller.NewBlogController(db)
-	authController := controller.NewAuthController(db)
+	// passing db conn to handlers
+	blogHandler := handlers.NewBlogController(db)
+	authHandler := handlers.NewAuthController(db)
+	adminHandler := handlers.NewAdminHandler(db)
 
 	//routes
 	mux := http.NewServeMux()
@@ -70,23 +116,29 @@ func main() {
 	//static file config
 	fs := http.FileServer(http.Dir("./static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
-	mux.HandleFunc("/", blogController.ServeIndex)
-	mux.HandleFunc("/blog/{id}", blogController.ServeBlog)
+	mux.HandleFunc("/", blogHandler.ServeIndex)
+	mux.HandleFunc("/blog/{id}", blogHandler.ServeBlog)
+	mux.HandleFunc("/admin/login", authHandler.ServeAdminLogin)
+
+
+	// for middleware use handle
+	mux.Handle("GET /admin/protected", protected(http.HandlerFunc(adminHandler.AdminPrivate)))
 
 	// auth
-	mux.HandleFunc("POST /register", authController.RegisterUser)
-	mux.HandleFunc("POST /login", authController.LoginUser)
+	mux.HandleFunc("POST /login", authHandler.LoginUser)
+	mux.HandleFunc("POST /register", authHandler.RegisterUser)
+	mux.HandleFunc("GET /logout", authHandler.LogoutUser)
 
 	// application related
-	mux.HandleFunc("POST /add", blogController.AddNewBlog)
-	mux.HandleFunc("DELETE /delete/{id}", blogController.DeleteBlog)
-	mux.HandleFunc("PUT /update/{id}", blogController.UpdateBlog)
-	mux.HandleFunc("GET /viewall", blogController.ViewAllBlogs)
-	mux.HandleFunc("GET /view/{id}", blogController.ViewBlog)
+	mux.HandleFunc("POST /add", blogHandler.AddNewBlog)
+	mux.HandleFunc("DELETE /delete/{id}", blogHandler.DeleteBlog)
+	mux.HandleFunc("PUT /update/{id}", blogHandler.UpdateBlog)
+	mux.HandleFunc("GET /viewall", blogHandler.ViewAllBlogs)
+	mux.HandleFunc("GET /view/{id}", blogHandler.ViewBlog)
 
 	// start server
 	slog.Info("server started", "port", "8080")
-	if err := http.ListenAndServe(":8080", loggingMiddleware(mux)); err != nil {
+	if err := http.ListenAndServe(":8080", corsMiddleware(loggingMiddleware(mux))); err != nil {
 		slog.Error("error starting http server", "message", err.Error())
 	}
 }

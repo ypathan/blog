@@ -1,4 +1,4 @@
-package controller
+package handlers
 
 import (
 	"database/sql"
@@ -27,7 +27,7 @@ func (s *BlogController) ServeIndex(w http.ResponseWriter, r *http.Request) {
 
 	allBlogs, err := s.repo.FindAll()
 
-	temp := template.Must(template.ParseFiles("static/index.gohtml", "static/ascii.html", "static/particles.html"))
+	temp := template.Must(template.ParseFiles("static/index.gohtml", "static/ascii.gohtml", "static/particles.gohtml"))
 	if err != nil {
 		slog.Error("error getting all blogs", "error", err.Error())
 	}
@@ -41,7 +41,7 @@ func (s *BlogController) ServeIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *BlogController) ServeBlog(w http.ResponseWriter, r *http.Request) {
-	temp := template.Must(template.ParseFiles("static/blog.gohtml", "static/ascii.html", "static/particles.html"))
+	temp := template.Must(template.ParseFiles("static/blog.gohtml", "static/ascii.gohtml", "static/particles.gohtml"))
 
 	idstr := r.PathValue("id")
 	id, err := strconv.Atoi(idstr)

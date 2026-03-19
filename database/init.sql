@@ -1,8 +1,16 @@
-create table if not exists blog (
-    id serial primary key,
-    created_at timestamptz not null default now(),
-    modified_at timestamptz not null default now(),
-    is_deleted bool not null default false,
-	title text not null,
-    content text
+CREATE TABLE IF NOT EXISTS blog (
+    id          SERIAL PRIMARY KEY,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    modified_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    is_deleted  BOOL NOT NULL DEFAULT FALSE,
+    title       TEXT NOT NULL,
+    content     TEXT
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    id       SERIAL PRIMARY KEY,
+    username TEXT NOT NULL DEFAULT '',
+    password TEXT NOT NULL DEFAULT '',
+	session_token text not null default '',
+	csrf_token text not null default ''
 );

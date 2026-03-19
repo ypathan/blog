@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+	<link href="/static/css/adminLogin.css" rel="stylesheet">
+	<link href="/static/css/global.css" rel="stylesheet">
+</head>
+
+<body>
+	{{template "ascii" . }}
+
+	<form method="post" style="display: flex; flex-direction: column">
+		<input type="text" name="username" id="username" placeholder="username" value="ypathan">
+		<input type="password" name="password" id="password" placeholder="password" value="password">
+		<button type="submit">Submit</button>
+	</form>
+
+	<button onclick="logout()"> logout </button>
+	<button onclick="priv()"> priv </button>
+
+	{{ template "particles" . }}
+</body>
+
+<script>
+
+	let username;
+	let password;
+
+	document.querySelector('form').addEventListener('submit', (e) => {
+		username = document.querySelector('#username').value
+		password = document.querySelector('#password').value
+		console.log(username)
+		console.log(password)
+
+		e.preventDefault()
+		fetch("/login", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			credentials: "include",
+			body: JSON.stringify({
+				"username": username,
+				"password": password
+			})
+		}).then(res => {
+			if (!res.ok) {
+				return res.text().then(err => {
+					throw new Error(err)
+				})
+			}
+
+			return res.json()
+		})
+			.then(data => console.log(data))
+			.catch(e => {
+				console.error(e)
+			})
+	})
+
+	function logout() {
+		fetch("/logout", {
+			method: "GET",
+			credentials: "include",
+		}).then(res => {
+			if (!res.ok) {
+				return res.text().then(err => {
+					throw new Error(err)
+				})
+			}
+
+			return res.text()
+		})
+			.then(data => console.log(data))
+			.catch(e => {
+				console.error(e)
+			})
+	}
+
+	function priv(){
+		fetch("/admin/protected", {
+			method: "GET",
+			credentials: "include",
+		}).then(res => {
+			if (!res.ok) {
+				return res.text().then(err => {
+					throw new Error(err)
+				})
+			}
+
+			return res.text()
+		})
+			.then(data => {
+				console.log(data)
+				console.log(document.cookie)
+			})
+			.catch(e => {
+				alert("error: "+ e)
+			})
+	}
+
+</script>
+
+</html>
