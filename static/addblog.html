@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Add Blog</title>
+        <link href="/static/css/addblog.css" rel="stylesheet">
+        <link href="/static/css/global.css" rel="stylesheet">
+</head>
+<body>
+<!-- {{ template "ascii" . }} -->
+
+<input type="text" name="title" value="" id="title" placeholder="Enter title here...">
+
+<div class="parent">
+        <textarea id="code" oninput="preview()"> </textarea>
+        <iframe id="canvas"></iframe>
+</div>
+
+
+<div class="bottomcontainer">
+        <button id="upload" onclick="upload()">Upload</button>
+
+</div>
+
+</body>
+
+{{ template "particles" . }}
+
+<script>
+    function preview() {
+        let code = document.querySelector('#code').value;
+        let iframe = document.querySelector('#canvas');
+        let canvas = iframe.contentWindow.document;
+
+        canvas.open();
+        canvas.write(`
+            <style>
+                * {
+                    white-space: pre-wrap;
+                    word-break: break-word;
+                    color: whitesmoke;
+                }
+                h1, p { font-family: 'Your Font', sans-serif; }
+                code { background: #00000069; color: indianred; }
+            </style>
+            ${code}
+        `);
+        canvas.close();
+    }
+
+    function upload(){
+        let code = document.querySelector("#code").value;
+        let title = document.querySelector("#title").value;
+		
+		// empty text area length is 1
+		if (code.length == 1 ){
+			alert("Enter Something..")
+			return
+		}
+
+        fetch('/add', {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body : JSON.stringify({
+                "title" : title ,
+                "content" : code
+            })
+        })
+            .then(res => {
+                if (!res.ok){
+                    return res.text().then(err =>{
+                        throw new Error(err)
+                    })
+                }
+            })
+            .then(data => {
+                alert("Successfully Added")
+                document.querySelector("#code").value = ""
+				window.location.href = "/admin"
+            })
+            .catch(err =>{
+                alert("Error: ", err)
+            })
+    }
+</script>
+
+</html>

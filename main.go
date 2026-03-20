@@ -31,23 +31,22 @@ func protected(next http.Handler) http.Handler {
 		sessionToken, err := r.Cookie("session_token")
 		if err != nil {
 			slog.Error("error getting session_token from request", "error", err.Error())
-			http.Error(w, "Unauthorize Access, Login First", 401 )
+			http.Error(w, "Unauthorize Access, Login First", 401)
 			return
 		}
 
 		csrfToken, err := r.Cookie("csrf_token")
 		if err != nil {
 			slog.Error("error getting csrf_token from request", "error", err.Error())
-			http.Error(w, "Unauthorize Access, Login First", 401 )
+			http.Error(w, "Unauthorize Access, Login First", 401)
 			return
 		}
 
 		if sessionToken.Value == "" || csrfToken.Value == "" {
-			slog.Error("either of the required cookie is empty" ) 
-			http.Error(w, "Unauthorize Access, Login First", 401 )
+			slog.Error("either of the required cookie is empty")
+			http.Error(w, "Unauthorize Access, Login First", 401)
 			return
 		}
-
 
 		next.ServeHTTP(w, r)
 	})
@@ -97,7 +96,7 @@ func main() {
 	// -------------log to std out---------------------
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		AddSource: true,
-		Level: slog.LevelDebug,
+		Level:     slog.LevelDebug,
 	}))
 	slog.SetDefault(logger)
 
@@ -115,14 +114,18 @@ func main() {
 
 	//static file config
 	fs := http.FileServer(http.Dir("./static"))
+
+	// public views
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 	mux.HandleFunc("/", blogHandler.ServeIndex)
 	mux.HandleFunc("/blog/{id}", blogHandler.ServeBlog)
 	mux.HandleFunc("/admin/login", authHandler.ServeAdminLogin)
 
-
-	// for middleware use handle
+	// private apis
 	mux.Handle("GET /admin/protected", protected(http.HandlerFunc(adminHandler.AdminPrivate)))
+
+	// private views
+	mux.Handle("/admin/addblog", protected(http.HandlerFunc(adminHandler.AdminAddBlog)))
 
 	// auth
 	mux.HandleFunc("POST /login", authHandler.LoginUser)

@@ -1,0 +1,60 @@
+body {
+	margin: 10px;
+}
+
+.parent {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: flex-start;
+	width: 95%;
+	height: 80vh;
+}
+
+#title {
+	width: 95%;
+	padding: 10px;
+	color: white;
+	background: transparent;
+	border: 0.5px solid whitesmoke;
+	border-radius: 10px;
+	margin-bottom: 10px;
+	backdrop-filter: blur(10px);
+}
+
+textarea {
+	padding: 10px;
+	font-family: monospace;
+	width: 45%;
+	height: 100%;
+	color: whitesmoke;
+	background: transparent;
+	backdrop-filter: blur(10px);
+	caret-shape: block;
+	caret-color: whitesmoke;
+	border: 0.5px solid whitesmoke;
+	border-radius: 10px;
+}
+
+iframe {
+	width: 50%;
+	height: 100%;
+	font-family: "VT323", monospace;
+	backdrop-filter: blur(10px);
+	border: 0.5px solid whitesmoke;
+	border-radius: 10px;
+}
+
+#upload {
+	padding: 5px 10px;
+	font-size: 20px;
+}
+
+.bottomcontainer {
+	padding: 10px;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+}

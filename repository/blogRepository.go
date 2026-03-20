@@ -54,7 +54,7 @@ func (r *BlogRepository) FindByID(id int) (*types.Blog, error) {
 }
 
 func (r *BlogRepository) FindAll() (map[int][]types.Blog, error) {
-	rows, err := r.db.Query("SELECT id, created_at, modified_at, is_deleted, content, title FROM blog WHERE is_deleted = false")
+	rows, err := r.db.Query("SELECT id, created_at, modified_at, is_deleted, content, title FROM blog WHERE is_deleted = false order by id desc")
 	if err != nil {
 		slog.Error("failed to query blogs", "error", err)
 		return nil, err

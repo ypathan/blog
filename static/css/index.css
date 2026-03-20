@@ -1,4 +1,4 @@
-.blogparent{
+.blogparent {
 	background-color: rgba(255, 255, 255, 0.05);
 	backdrop-filter: blur(8px);
 	-webkit-backdrop-filter: blur(8px);
@@ -19,8 +19,12 @@
 
 #date,
 #content {
-	font-size: 1.5rem;
+	font-size: 1rem;
+}
+
+#date {
 	color: lightgray;
+	text-align: center;
 }
 
 button {
@@ -36,7 +40,7 @@ button {
 	width: 100%;
 }
 
-.page{
+.page {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;

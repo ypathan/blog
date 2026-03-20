@@ -18,6 +18,10 @@
 		<button type="submit">Submit</button>
 	</form>
 
+	<textarea id="code" oninput="updatePreview()" placeholder="Enter HTML here..."></textarea>
+	<iframe id="preview"></iframe>
+
+
 	<button onclick="logout()"> logout </button>
 	<button onclick="priv()"> priv </button>
 
@@ -25,6 +29,14 @@
 </body>
 
 <script>
+
+	function updatePreview() {
+		const code = document.getElementById('code').value;
+		const preview = document.getElementById('preview').contentWindow.document;
+		preview.open();
+		preview.write(code);
+		preview.close();
+	}
 
 	let username;
 	let password;
@@ -80,7 +92,7 @@
 			})
 	}
 
-	function priv(){
+	function priv() {
 		fetch("/admin/protected", {
 			method: "GET",
 			credentials: "include",
@@ -98,7 +110,7 @@
 				console.log(document.cookie)
 			})
 			.catch(e => {
-				alert("error: "+ e)
+				alert("error: " + e)
 			})
 	}
 

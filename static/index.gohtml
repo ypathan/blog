@@ -18,10 +18,10 @@
         <h1>Page: {{$pageNum}}</h1>
         {{range $blogs}}
             <div class="blogparent">
-                <div class="blogcontainer" data-id={{.ID}} onclick="handleViewBlog(this)">
+				<div class="blogcontainer" data-id={{.ID}} onclick="handleViewBlog(this)">
                     <h2>{{.Title}}</h2>
-                    <span id="date">Written On: {{.CreatedAt}}</span>
-                    <p>{{.Content}}</p>
+					<span id="date">{{.CreatedAt}}</span></br><br/>
+                    <p id="content">{{.Content}}</p>
                 </div>
             </div>
         {{end}}
