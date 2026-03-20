@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title></title>
+		<link href="/static/css/admindashboard.css" rel="stylesheet">
+	</head>
+	<body>
+		<h1>Admin Dashboard </h1>
+
+		<button onclick="addBlog()"> Add Blog </button>
+		{{ template "particles" .}}
+	</body>
+	<script>
+		function addBlog(){
+			window.location.href = "/admin/addblog"
+		}
+	</script>	
+</html>

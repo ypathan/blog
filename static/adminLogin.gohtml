@@ -12,31 +12,17 @@
 <body>
 	{{template "ascii" . }}
 
-	<form method="post" style="display: flex; flex-direction: column">
-		<input type="text" name="username" id="username" placeholder="username" value="ypathan">
+	<form method="post" id="form" >
+		<input type="text" autocomplete="username" name="username" id="username" placeholder="username" value="ypathan">
 		<input type="password" name="password" id="password" placeholder="password" value="password">
 		<button type="submit">Submit</button>
 	</form>
-
-	<textarea id="code" oninput="updatePreview()" placeholder="Enter HTML here..."></textarea>
-	<iframe id="preview"></iframe>
-
-
-	<button onclick="logout()"> logout </button>
-	<button onclick="priv()"> priv </button>
 
 	{{ template "particles" . }}
 </body>
 
 <script>
 
-	function updatePreview() {
-		const code = document.getElementById('code').value;
-		const preview = document.getElementById('preview').contentWindow.document;
-		preview.open();
-		preview.write(code);
-		preview.close();
-	}
 
 	let username;
 	let password;
@@ -67,53 +53,11 @@
 
 			return res.json()
 		})
-			.then(data => console.log(data))
+			.then(data => window.location.href = '/admin/dashboard' )
 			.catch(e => {
 				console.error(e)
 			})
 	})
-
-	function logout() {
-		fetch("/logout", {
-			method: "GET",
-			credentials: "include",
-		}).then(res => {
-			if (!res.ok) {
-				return res.text().then(err => {
-					throw new Error(err)
-				})
-			}
-
-			return res.text()
-		})
-			.then(data => console.log(data))
-			.catch(e => {
-				console.error(e)
-			})
-	}
-
-	function priv() {
-		fetch("/admin/protected", {
-			method: "GET",
-			credentials: "include",
-		}).then(res => {
-			if (!res.ok) {
-				return res.text().then(err => {
-					throw new Error(err)
-				})
-			}
-
-			return res.text()
-		})
-			.then(data => {
-				console.log(data)
-				console.log(document.cookie)
-			})
-			.catch(e => {
-				alert("error: " + e)
-			})
-	}
-
 </script>
 
 </html>

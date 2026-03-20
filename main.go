@@ -126,6 +126,7 @@ func main() {
 
 	// private views
 	mux.Handle("/admin/addblog", protected(http.HandlerFunc(adminHandler.AdminAddBlog)))
+	mux.Handle("/admin/dashboard", protected(http.HandlerFunc(adminHandler.AdminDashboard)))
 
 	// auth
 	mux.HandleFunc("POST /login", authHandler.LoginUser)
