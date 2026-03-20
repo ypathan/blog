@@ -16,8 +16,8 @@
 	<div class="parent">
 		<div class="child">
 			<h1 id="title">{{.blog.Title}}</h1><br>
-				<span id="date">Written On: {{.blog.CreatedAt}}</span><br><br>
-			<span id="content">{{.blog.Content}}</span>
+			<span id="date">Written On: {{.blog.CreatedAt}}</span><br><br>
+			<iframe scrolling='no' id="canvas"></iframe>
 		</div>
 	</div>
 
@@ -25,5 +25,33 @@
 
 {{ template "particles" . }}
 <script src="/static/scripts/blog.js"> </script>
+<script>
+	let code = `{{.blog.Content}}`
+	let iframe = document.querySelector('#canvas');
+
+	iframe.addEventListener('load', function () {
+		iframe.style.height = iframe.contentDocument.body.scrollHeight + 'px';
+	});
+
+	let canvas = iframe.contentWindow.document;
+	canvas.open();
+	canvas.write(`
+    <style>
+        * {
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: whitesmoke;
+        }
+        h1, p { font-family: 'Your Font', sans-serif; }
+        code { background: #00000069; color: indianred; }
+    </style>
+    ${code}
+`);
+	canvas.close();
+
+	// Fallback: resize after close() in case load already fired
+	iframe.style.height = iframe.contentDocument.body.scrollHeight + 'px';
+
+</script>
 
 </html>
