@@ -2,37 +2,44 @@ package handlers
 
 import (
 	"database/sql"
+	"log/slog"
 	"net/http"
 	"text/template"
+
+	"yousuf.xyz/blog/repository"
 )
 
 type AdminHandler struct {
-	db *sql.DB
+	repo *repository.BlogRepository
 }
 
-func NewAdminHandler(_db *sql.DB) *AdminHandler{
+func NewAdminHandler(_db *sql.DB) *AdminHandler {
 	return &AdminHandler{
-		db: _db,
+		repo: repository.NewBlogRepository(_db),
 	}
 }
 
-func (a *AdminHandler) AdminPrivate(w http.ResponseWriter , r *http.Request) {
+func (a *AdminHandler) AdminPrivate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("hello world"))
 }
 
-func (a *AdminHandler) AdminAddBlog(w http.ResponseWriter, r *http.Request){
-	tmp := template.Must(template.ParseFiles("static/addblog.html", "static/particles.gohtml", "static/ascii.gohtml"))
+func (a *AdminHandler) AdminAddBlog(w http.ResponseWriter, r *http.Request) {
+	tmp := template.Must(template.ParseFiles("static/addblog.html", "static/particles.gohtml", "static/ascii.gohtml", "static/admintop.html"))
 	ctx := map[string]any{}
 	tmp.Execute(w, ctx)
-	
+
 }
 
+func (a *AdminHandler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
+	tmp := template.Must(template.ParseFiles("static/adminDashboard.html", "static/admintop.html", "static/particles.gohtml", "static/ascii.gohtml"))
 
-func (a *AdminHandler) AdminDashboard(w http.ResponseWriter, r *http.Request){
-	tmp := template.Must(template.ParseFiles("static/adminDashboard.html", "static/particles.gohtml", "static/ascii.gohtml"))
-	ctx := map[string]any{}
+	allBlogs, err := a.repo.FindAll()
+	if err != nil {
+		slog.Error("error fetching blogs for admin dashboard", "error")
+	}
+
+	ctx := map[string]any{
+		"allBlogs": allBlogs,
+	}
 	tmp.Execute(w, ctx)
-	
 }
-
-

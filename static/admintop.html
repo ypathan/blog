@@ -1,0 +1,31 @@
+{{ define "admintop" }}
+
+<link rel="stylesheet" href="/static/css/admintop.css">
+<div class="top">
+	<h1 id="dashboard">Admin Dashboard </h1>
+</div>
+<script>
+	let addblogbutton = document.createElement("button");
+	addblogbutton.textContent = 'Add Blog'
+	addblogbutton.id = 'addblog'
+	addblogbutton.onclick = addBlog
+
+	// append for all except /admin/addblog
+	if(window.location.pathname != '/admin/addblog'){
+		document.querySelector('.top').appendChild(addblogbutton)
+	}
+	function addBlog() {
+		window.location.href = "/admin/addblog"
+	}
+
+	document.body.dataset.page = window.location.pathname
+
+	document.querySelector('#dashboard').addEventListener('click', (e)=>{
+		if (window.location.pathname == "/admin/dashboard") return
+		window.location.href = "/admin/dashboard"
+	})
+
+
+</script>
+
+{{ end }}

@@ -1,0 +1,45 @@
+.blogparent {
+	background-color: rgba(255, 255, 255, 0.05);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	border-radius: 30px;
+	border-left: 1px dashed white;
+	border-right: 1px dashed white;
+	width: 60%;
+	margin: 15px;
+}
+
+.blogcontainer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-radius: 30px;
+	padding: 10px 20px;
+	cursor: pointer;
+	width: 100%;
+}
+
+.top {
+	padding: 0.5rem;
+	width: 60%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background-color: transparent;
+	backdrop-filter: blur(10px);
+	margin-top: 20px;
+}
+
+#edit {
+	font-size: 1.5rem;
+	padding: 0.2rem 0.5rem;
+	background: #c3c3c3;
+	border: none;
+	backdrop-filter: blur(20px);
+	border-radius: 2px;
+	cursor: pointer;
+}
+
+#title {
+	font-size: 1.5rem;
+}
