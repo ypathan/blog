@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Edit Blog</title>
+	<link href="/static/css/addblog.css" rel="stylesheet">
+	<link href="/static/css/global.css" rel="stylesheet">
+</head>
+
+<body>
+{{ template "admintop" . }}
+
+<input type="text" name="title" value="" id="title" placeholder="Enter title here...">
+
+<div class="parent">
+	<textarea id="code" oninput="preview()"> </textarea>
+	<iframe id="canvas"></iframe>
+</div>
+
+
+<div class="bottomcontainer">
+	<button id="upload" onclick="upload()">Upload</button>
+
+</div>
+
+{{ template "particles" . }}
+</body>
+<script>
+
+	//TODO: get path params
+	try{
+		let params = new URLSearchParams(document.location.search);
+		let id = window.location.pathname.split("/").at(-1)
+		let title = params.get("title")
+		let content = params.get("content")
+
+		if (id === null || title  === null || content === null || id === "" || title ==="" || content === "" ){
+			throw new Error("either of the required values is not present")
+		}
+
+		document.querySelector('#code').textContent = content
+		document.querySelector('input#title').value = title
+
+	}catch (e){
+		window.location.href = "/admin/dashboard"
+	}
+
+
+	function preview() {
+		let code = document.querySelector('#code').value;
+		let iframe = document.querySelector('#canvas');
+		let canvas = iframe.contentWindow.document;
+
+		canvas.open();
+		canvas.write(`
+            <style>
+                * {
+                    white-space: pre-wrap;
+                    word-break: break-word;
+                    color: whitesmoke;
+                }
+                h1, p { font-family: 'Your Font', sans-serif; }
+                code { background: #00000069; color: indianred; }
+            </style>
+            ${code}
+        `);
+		canvas.close();
+	}
+
+	preview()
+	//TODO: inject them into relvant elements
+
+</script>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Admin Dashboard</title>
+	<link href="/static/css/admindashboard.css" rel="stylesheet">
+	<link href="/static/css/global.css" rel="stylesheet">
+</head>
+
+<body>
+
+	{{ template "admintop" . }}
+
+	{{range $key, $value := .allBlogs}}
+	{{range $value}}
+	<div class="blogparent">
+		<div class="blogcontainer">
+			<span id="title">{{.Title}}</span>
+
+			<!-- onclick entire button will be passed to function -->
+			<button class="edit-btn" data-id="{{.ID}}" data-title="{{.Title}}" data-content="{{.Content}}"
+				onclick="editblog(this)">Edit</button>
+		</div>
+	</div>
+	{{end}}
+	{{end}}
+
+
+	{{ template "particles" .}}
+
+</body>
+<script>
+
+	function editblog(btn) {
+		const {id, title, content} = btn.dataset
+		window.location.href = `/admin/editblog/${id}?title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`
+	}
+</script>
+
+</html>

@@ -30,8 +30,14 @@ func (a *AdminHandler) AdminAddBlog(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (a *AdminHandler) EditBlog(w http.ResponseWriter, r *http.Request) {
+	tmp := template.Must(template.ParseFiles("static/editblog.html", "static/particles.gohtml", "static/ascii.gohtml", "static/admintop.html"))
+	ctx := map[string]any{}
+	tmp.Execute(w, ctx)
+}
+
 func (a *AdminHandler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
-	tmp := template.Must(template.ParseFiles("static/adminDashboard.html", "static/admintop.html", "static/particles.gohtml", "static/ascii.gohtml"))
+	tmp := template.Must(template.ParseFiles("static/adminDashboard.gohtml", "static/admintop.html", "static/particles.gohtml", "static/ascii.gohtml"))
 
 	allBlogs, err := a.repo.FindAll()
 	if err != nil {
