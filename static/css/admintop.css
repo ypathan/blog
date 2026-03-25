@@ -19,6 +19,18 @@
     cursor: pointer;
 }
 
+
+#deleteblog {
+  font-size: 1.5rem;
+  padding: 0.2rem 0.5rem;
+  background: #ff9a9a;
+  border: none;
+  backdrop-filter: blur(20px);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+
 body[data-page="/admin/addblog"] .top {
 	justify-content: center;
 }

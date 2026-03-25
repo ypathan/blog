@@ -25,7 +25,6 @@ func corsMiddleware(next http.Handler) http.Handler {
 }
 
 func protected(next http.Handler) http.Handler {
-
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		sessionToken, err := r.Cookie("session_token")
@@ -116,18 +115,18 @@ func main() {
 	fs := http.FileServer(http.Dir("./static"))
 
 	// public views
-	mux.Handle("/static/", http.StripPrefix("/static/", fs))
-	mux.HandleFunc("/", blogHandler.ServeIndex)
-	mux.HandleFunc("/blog/{id}", blogHandler.ServeBlog)
-	mux.HandleFunc("/admin/login", authHandler.ServeAdminLogin)
+	mux.Handle("GET /static/", http.StripPrefix("/static/", fs))
+	mux.HandleFunc("GET /", blogHandler.ServeIndex)
+	mux.HandleFunc("GET /blog/{id}", blogHandler.ServeBlog)
+	mux.HandleFunc("GET /admin/login", authHandler.ServeAdminLogin)
 
 	// private apis
 	mux.Handle("GET /admin/protected", protected(http.HandlerFunc(adminHandler.AdminPrivate)))
 
 	// private views
-	mux.Handle("/admin/addblog", protected(http.HandlerFunc(adminHandler.AdminAddBlog)))
-	mux.Handle("/admin/dashboard", protected(http.HandlerFunc(adminHandler.AdminDashboard)))
-	mux.Handle("/admin/editblog/{id}", protected(http.HandlerFunc(adminHandler.EditBlog)))
+	mux.Handle("GET /admin/addblog", protected(http.HandlerFunc(adminHandler.AdminAddBlog)))
+	mux.Handle("GET /admin/dashboard", protected(http.HandlerFunc(adminHandler.AdminDashboard)))
+	mux.Handle("GET /admin/editblog/{id}", protected(http.HandlerFunc(adminHandler.EditBlog)))
 
 	// auth
 	mux.HandleFunc("POST /login", authHandler.LoginUser)
@@ -135,9 +134,9 @@ func main() {
 	mux.HandleFunc("GET /logout", authHandler.LogoutUser)
 
 	// application related
-	mux.HandleFunc("POST /add", blogHandler.AddNewBlog)
-	mux.HandleFunc("DELETE /delete/{id}", blogHandler.DeleteBlog)
-	mux.HandleFunc("PUT /update/{id}", blogHandler.UpdateBlog)
+	mux.Handle("POST /add",protected( http.HandlerFunc (blogHandler.AddNewBlog)))
+	mux.Handle("DELETE /delete/{id}", protected( http.HandlerFunc( blogHandler.DeleteBlog)))
+	mux.Handle("PUT /update/{id}", protected(http.HandlerFunc( blogHandler.UpdateBlog)))
 	mux.HandleFunc("GET /viewall", blogHandler.ViewAllBlogs)
 	mux.HandleFunc("GET /view/{id}", blogHandler.ViewBlog)
 

@@ -2,11 +2,11 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Edit Blog</title>
-	<link href="/static/css/addblog.css" rel="stylesheet">
-	<link href="/static/css/global.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Edit Blog</title>
+  <link href="/static/css/addblog.css" rel="stylesheet">
+  <link href="/static/css/global.css" rel="stylesheet">
 </head>
 
 <body>
@@ -15,46 +15,24 @@
 <input type="text" name="title" value="" id="title" placeholder="Enter title here...">
 
 <div class="parent">
-	<textarea id="code" oninput="preview()"> </textarea>
-	<iframe id="canvas"></iframe>
+  <textarea id="code" oninput="preview()"> </textarea>
+  <iframe id="canvas"></iframe>
 </div>
 
 
 <div class="bottomcontainer">
-	<button id="upload" onclick="upload()">Upload</button>
-
+  <button id="upload" onclick="upload()">Upload</button>
 </div>
 
 {{ template "particles" . }}
 </body>
 <script>
 
-	//TODO: get path params
-	try{
-		let params = new URLSearchParams(document.location.search);
-		let id = window.location.pathname.split("/").at(-1)
-		let title = params.get("title")
-		let content = params.get("content")
-
-		if (id === null || title  === null || content === null || id === "" || title ==="" || content === "" ){
-			throw new Error("either of the required values is not present")
-		}
-
-		document.querySelector('#code').textContent = content
-		document.querySelector('input#title').value = title
-
-	}catch (e){
-		window.location.href = "/admin/dashboard"
-	}
-
-
-	function preview() {
-		let code = document.querySelector('#code').value;
-		let iframe = document.querySelector('#canvas');
-		let canvas = iframe.contentWindow.document;
-
-		canvas.open();
-		canvas.write(`
+  function preview() {
+    let code = document.querySelector('#code').value;
+    let iframe = document.querySelector('#canvas');
+    let canvas = iframe.contentWindow.document;
+    canvas.body.innerHTML = `
             <style>
                 * {
                     white-space: pre-wrap;
@@ -65,12 +43,76 @@
                 code { background: #00000069; color: indianred; }
             </style>
             ${code}
-        `);
-		canvas.close();
-	}
+        `
+  }
 
-	preview()
-	//TODO: inject them into relvant elements
+  function deleteblog(){
+    console.log("hello world")
+  }
+
+  function upload() {
+    let code = document.querySelector("#code").value;
+    let title = document.querySelector("#title").value;
+    let params = new URLSearchParams(document.location.search);
+    let id = window.location.pathname.split("/").at(-1)
+
+
+    // empty text area length is 1
+    if (code.length == 1) {
+      alert("Enter Something..")
+      return
+    }
+
+    fetch(`/update/${id}`, {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "title": title,
+        "content": code
+      })
+    })
+      .then(res => {
+        if (!res.ok) {
+          return res.text().then(err => {
+            throw new Error(err)
+          })
+        }
+      })
+      .then(data => {
+        alert("Successfully updated the content")
+        document.querySelector("#code").value = ""
+        window.location.href = "/admin/dashboard"
+      })
+      .catch(err => {
+        alert("Error: ", err)
+      })
+  }
+
+  //1. get path params
+  try {
+    let params = new URLSearchParams(document.location.search);
+    let id = window.location.pathname.split("/").at(-1)
+    let title = params.get("title")
+    let content = params.get("content")
+
+    if (id === null || title === null || content === null || id === "" || title === "" || content === "") {
+      throw new Error("either of the required values is not present")
+    }
+
+
+    // 2. inject data into fields
+    document.querySelector('#code').textContent = decodeURIComponent(content)
+    document.querySelector('input#title').value = decodeURIComponent(title)
+    preview()
+
+  } catch (e) {
+    console.log(e)
+    window.location.href = "/admin/dashboard"
+  }
+
 
 </script>
 </html>

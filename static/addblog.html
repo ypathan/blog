@@ -52,7 +52,7 @@
     function upload(){
         let code = document.querySelector("#code").value;
         let title = document.querySelector("#title").value;
-		
+
 		// empty text area length is 1
 		if (code.length == 1 ){
 			alert("Enter Something..")
@@ -80,7 +80,7 @@
             .then(data => {
                 alert("Successfully Added")
                 document.querySelector("#code").value = ""
-				window.location.href = "/admin"
+                window.location.href = "/admin/dashboard"
             })
             .catch(err =>{
                 alert("Error: ", err)

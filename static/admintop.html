@@ -1,31 +1,75 @@
 {{ define "admintop" }}
 
-<link rel="stylesheet" href="/static/css/admintop.css">
-<div class="top">
-	<h1 id="dashboard">Admin Dashboard </h1>
-</div>
-<script>
-	let addblogbutton = document.createElement("button");
-	addblogbutton.textContent = 'Add Blog'
-	addblogbutton.id = 'addblog'
-	addblogbutton.onclick = addBlog
+  <link rel="stylesheet" href="/static/css/admintop.css">
+  <div class="top">
+    <h1 id="dashboard">Admin Dashboard </h1>
+  </div>
+  <script>
 
-	// append for all except /admin/addblog
-	if(window.location.pathname != '/admin/addblog'){
-		document.querySelector('.top').appendChild(addblogbutton)
-	}
-	function addBlog() {
-		window.location.href = "/admin/addblog"
-	}
+    let addblogbutton = document.createElement("button");
+    addblogbutton.textContent = 'Add Blog'
+    addblogbutton.id = 'addblog'
+    addblogbutton.onclick = addBlog
 
-	document.body.dataset.page = window.location.pathname
+    let deleteblogbutton = document.createElement('button');
+    deleteblogbutton.textContent = 'Delete Blog'
+    deleteblogbutton.id = 'deleteblog'
+    deleteblogbutton.onclick = deleteblog
 
-	document.querySelector('#dashboard').addEventListener('click', (e)=>{
-		if (window.location.pathname == "/admin/dashboard") return
-		window.location.href = "/admin/dashboard"
-	})
+    const editblogpattern = new URLPattern({
+      pathname: "/admin/editblog/:id"
+    })
 
+    // * urlpattern has to be matched with full url
+    // add delete button on edit blog page
+    if (editblogpattern.test(window.location.href)) {
+      document.querySelector('.top').appendChild(deleteblogbutton)
+    }
 
-</script>
+      // show add blog on all pages except the add blog page
+    // cuz no point on linking to add blog page when u are on it
+    else if (window.location.pathname !== '/admin/addblog') {
+      document.querySelector('.top').appendChild(addblogbutton)
+    }
+
+    function addBlog() {
+      window.location.href = "/admin/addblog"
+    }
+
+    function deleteblog() {
+      let id = editblogpattern.exec(window.location.href).pathname.groups.id
+
+      fetch(`/delete/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      })
+        .then(res => {
+          if (!res.ok) {
+            return res.text().then(err => {
+              throw new Error(err)
+            })
+          }
+        })
+        .then(data => {
+          alert("Successfully Deleted Blog")
+          document.querySelector("#code").value = ""
+          document.querySelector("#title").value = ""
+
+          window.location.href = "/admin/dashboard"
+        })
+        .catch(err => {
+          alert("Error: ", err)
+        })
+    }
+
+    // setting page datatag to body so that .top css can be set dynamically
+    document.body.dataset.page = window.location.pathname
+
+    document.querySelector('#dashboard').addEventListener('click', (e) => {
+      if (window.location.pathname == "/admin/dashboard") return
+      window.location.href = "/admin/dashboard"
+    })
+
+  </script>
 
 {{ end }}
