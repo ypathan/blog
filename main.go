@@ -134,9 +134,9 @@ func main() {
 	mux.HandleFunc("GET /logout", authHandler.LogoutUser)
 
 	// application related
-	mux.Handle("POST /add",protected( http.HandlerFunc (blogHandler.AddNewBlog)))
-	mux.Handle("DELETE /delete/{id}", protected( http.HandlerFunc( blogHandler.DeleteBlog)))
-	mux.Handle("PUT /update/{id}", protected(http.HandlerFunc( blogHandler.UpdateBlog)))
+	mux.Handle("POST /add", protected(http.HandlerFunc(blogHandler.AddNewBlog)))
+	mux.Handle("DELETE /delete/{id}", protected(http.HandlerFunc(blogHandler.DeleteBlog)))
+	mux.Handle("PUT /update/{id}", protected(http.HandlerFunc(blogHandler.UpdateBlog)))
 	mux.HandleFunc("GET /viewall", blogHandler.ViewAllBlogs)
 	mux.HandleFunc("GET /view/{id}", blogHandler.ViewBlog)
 

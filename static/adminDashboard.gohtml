@@ -13,19 +13,34 @@
 
 	{{ template "admintop" . }}
 
-	{{range $key, $value := .allBlogs}}
-	{{range $value}}
-	<div class="blogparent">
-		<div class="blogcontainer">
-			<span id="title">{{.Title}}</span>
+{{/*	{{range $key, $value := .allBlogs}}*/}}
+{{/*	{{range $value}}*/}}
+{{/*	<div class="blogparent">*/}}
+{{/*		<div class="blogcontainer">*/}}
+{{/*			<span id="title">{{.Title}}</span>*/}}
 
-			<!-- onclick entire button will be passed to function -->
-			<button class="edit" data-id="{{.ID}}" data-title="{{.Title}}" data-content="{{.Content}}"
-				onclick="editblog(this)">Edit</button>
-		</div>
-	</div>
-	{{end}}
-	{{end}}
+{{/*			<!-- onclick entire button will be passed to function -->*/}}
+{{/*			<button class="edit" data-id="{{.ID}}" data-title="{{.Title}}" data-content="{{.Content}}"*/}}
+{{/*				onclick="editblog(this)">Edit</button>*/}}
+{{/*		</div>*/}}
+{{/*	</div>*/}}
+{{/*	{{end}}*/}}
+{{/*	{{end}}*/}}
+
+  	{{range .allBlogs}}
+  	<div class="blogparent">
+  		<div class="blogcontainer">
+  			<span id="title">{{.Title}}</span>
+
+  			<!-- onclick entire button will be passed to function -->
+  			<button class="edit" data-id="{{.ID}}" data-title="{{.Title}}" data-content="{{.Content}}"
+  				onclick="editblog(this)">Edit</button>
+  		</div>
+  	</div>
+  	{{end}}
+
+
+
 
 
 	{{ template "particles" .}}

@@ -39,13 +39,17 @@ func (a *AdminHandler) EditBlog(w http.ResponseWriter, r *http.Request) {
 func (a *AdminHandler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
 	tmp := template.Must(template.ParseFiles("static/adminDashboard.gohtml", "static/admintop.html", "static/particles.gohtml", "static/ascii.gohtml"))
 
-	allBlogs, err := a.repo.FindAll()
+	allBlogs, err := a.repo.AdminFindAll()
+	slog.Debug("blogs", "allBlogs", allBlogs)
 	if err != nil {
 		slog.Error("error fetching blogs for admin dashboard", "error")
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	ctx := map[string]any{
 		"allBlogs": allBlogs,
 	}
+
 	tmp.Execute(w, ctx)
 }

@@ -110,6 +110,35 @@ func (r *BlogRepository) FindAll() (map[int][]types.Blog, error) {
 	return pagination, nil
 }
 
+
+func (r *BlogRepository) AdminFindAll() ([]types.Blog, error) {
+	var blogs []types.Blog
+
+	rows, err := r.db.Query("SELECT id, created_at, modified_at, is_deleted, content, title FROM blog WHERE is_deleted = false order by id desc")
+	if err != nil {
+		slog.Error("failed to query blogs", "error", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var blog types.Blog
+		err := rows.Scan(&blog.ID, &blog.CreatedAt, &blog.ModifiedAt, &blog.IsDeleted, &blog.Content, &blog.Title)
+		if err != nil {
+			slog.Error("failed to scan blog row", "error", err)
+			continue
+		}
+
+		// format date
+		t, _ := time.Parse(time.RFC3339Nano, blog.CreatedAt)
+		blog.CreatedAt = t.Format("2006-01-02")
+
+		blogs = append(blogs, blog)
+	}
+
+	return blogs,err
+}
+
 func (r *BlogRepository) Update(id int, content string, title string) (*types.Blog, error) {
 
 	_, err := r.db.Exec("UPDATE blog SET content = $1, title = $2  WHERE id = $3", content, title, id)
